@@ -1,15 +1,15 @@
 {
-  "name": "projeto_backend_geracao_tech",
-  "version": "1.0.0",
+  "name"       : "projeto_backend_geracao_tech",
+  "version"    : "1.0.0",
   "description": "Projeto contruido com os conhecimentos obtidos do modulo backend do curso de programação do geração tech",
-  "main": "index.js",
-  "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "main"       : "index.js",
+  "scripts"    : {
+    "start": "nodemon server.js",
+    "test" : "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords"       : [],
+  "author"         : "",
+  "license"        : "ISC",
   "devDependencies": {
     "nodemon": "^3.1.4"
   }
