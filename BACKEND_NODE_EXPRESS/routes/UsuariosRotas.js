@@ -2,12 +2,13 @@ const express = require('express');
 const UsuariosControler = require('../controlers/UsuariosControler');
 const UsuariosRotas = express.Router();
 
-const UsuariosControler = new UsuariosControler();
+const usuariosControler = new UsuariosControler();
 
 //crud
-UsuariosRotas.get('/users', UsuariosControler.listar);
-UsuariosRotas.post('/users', UsuariosControler.criar);
-UsuariosRotas.put('/users', UsuariosControler.atualizar);
-UsuariosRotas.delete('/users', UsuariosControler.deletar);
+UsuariosRotas.get('/users', usuariosControler.listar);
+UsuariosRotas.get('/users/:id', usuariosControler.consultarPorId);
+UsuariosRotas.post('/users', usuariosControler.criar);
+UsuariosRotas.put('/users', usuariosControler.atualizar);
+UsuariosRotas.delete('/users', usuariosControler.deletar);
 
 module.exports = UsuariosRotas;
