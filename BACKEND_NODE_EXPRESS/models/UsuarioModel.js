@@ -16,7 +16,7 @@ class UsuarioModel {
     ];
 
 
-    static listar(request, response){
+    static listar(){
         return UsuarioModel.lista;
     }
 
@@ -30,13 +30,17 @@ class UsuarioModel {
 
     }
 
-    static atualizar(request, response){
+    static atualizar(id, data){
+
+        const indice = UsuarioModel.lista.findIndex(item => item.id == id);
+        UsuarioModel.lista[indice] = data;
+
 
     }
 
-    static deletar(request, response){
-
-
+    static deletar(id){
+        const dados = UsuarioModel.lista.filter(item => item.id != id);
+        UsuarioModel.lista - dados;
     }
 
 }

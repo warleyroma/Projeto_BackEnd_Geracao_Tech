@@ -31,11 +31,22 @@ class UsuariosControler {
     atualizar(request, response){
         //const UsuarioModel = UsuarioModel();
         //return UsuarioModel.atualizar()
+        const id = request.params.id;
+        const body = request.body;
+        UsuarioModel.atualizar(id, body)
+        return response.json({
+            message:"Usuário atualizado com sucesso"
+        }) 
     }
 
     deletar(request, response){
         //const UsuarioModel = UsuarioModel();
         //return UsuarioModel.deletar()
+        const id = request.params.id;
+        UsuarioModel.deletar(id);
+        return response.json({
+            message:"Usuário removido com sucesso"
+        })
     }
 }
 
