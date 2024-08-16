@@ -1,5 +1,6 @@
 const express = require('express')
 const UsuariosRotas = require('./routes/UsuariosRotas');
+const PostRotas = require('./routes/PostRotas');
 
 const host = "localhost"
 const port = 3000
@@ -12,6 +13,7 @@ app.get('/', (request, response) => {
 });
 
 app.use(UsuariosRotas);
+app.use(PostRotas);
 
 app.listen(port, host, () =>{
     console.log(`Servidor executando em http://${host}:${port}`)

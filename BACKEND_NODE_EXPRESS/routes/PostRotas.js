@@ -2,13 +2,13 @@ const express = require('express');
 const PostsController = require('../controlers/PostsController');
 const PostsRotas = express.Router();
 
-const PostsController = new PostsController();
+const postsController = new PostsController();
 
 //crud
-PostsRotas.get('/posts', PostsController.listar);
-PostsRotas.get('/posts/:id', PostsController.consultarPorId);
-PostsRotas.post('/posts', PostsController.criar);
-PostsRotas.put('/posts/:id', PostsController.atualizar);
-PostsRotas.delete('/posts/:id', PostsController.deletar);
+PostsRotas.get('/posts', postsController.listar);
+PostsRotas.get('/posts/:id', postsController.consultarPorId);
+PostsRotas.post('/posts', postsController.criar);
+PostsRotas.put('/posts/:id', postsController.atualizar);
+PostsRotas.delete('/posts/:id', postsController.deletar);
 
 module.exports = PostsRotas;

@@ -10,7 +10,7 @@ class PostModel {
         {
             id: 2,
             nome:"teste1",
-            login:""
+            conteudo:""
         }
     ];
 
@@ -32,14 +32,14 @@ class PostModel {
     static atualizar(id, data){
 
         const indice = PostModel.lista.findIndex(item => item.id == id);
-        UsuarioModel.lista[indice] = data;
+        PostModel.lista[indice] = data;
 
 
     }
 
     static deletar(id){
         const dados = PostModel.lista.filter(item => item.id != id);
-        UsuarioModel.lista - dados;
+        PostModel.lista - dados;
     }
 }
 
