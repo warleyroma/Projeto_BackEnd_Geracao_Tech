@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require ("sequelize");
+const { Sequelize } = require ("sequelize");
 
 const connection = new Sequelize({
     dialect: 'mysql', 
@@ -8,6 +8,8 @@ const connection = new Sequelize({
     password: "root",
     port:"3306"
 });
+
+connection.sync();
 
 module.exports = connection
  /*

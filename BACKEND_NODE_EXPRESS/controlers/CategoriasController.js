@@ -1,6 +1,6 @@
 const CategoriasModel = require('../models/CategoriasModel');
 
-class CategoriasModel {
+class CategoriasController {
     async listar(req, res) {
         const { limit = 12, page = 1, fields = 'name,slug', use_in_menu } = req.query;
       
@@ -46,33 +46,49 @@ class CategoriasModel {
 
   async criar(req, res) {
     const { name, slug, use_in_menu } = req.body;
+
+    // Verifica se todos os campos obrigatórios estão presentes
+    if (!name || !slug) {
+        return res.status(400).json({ message: 'Nome e slug são obrigatórios' });
+    }
+
     try {
-        const categorias = await CategoriasModel.criar(name, slug, use_in_menu);
-        const headers = req.headers;
-        res.status(201).json({   message: 'Usuário criado com categoria', requestHeaders: headers  });
-        
+        // Cria a nova categoria usando o modelo
+        const categoria = await CategoriasModel.criar(name, slug, use_in_menu);
+
+        // Retorna uma resposta de sucesso com a categoria criada
+        res.status(201).json({ 
+            message: 'Categoria criada com sucesso', 
+            categoria: categoria 
+        });
     } catch (err) {
-        res.status(500).json({ message: 'Erro ao criar categoria', error: err.message });
+        // Retorna uma resposta de erro com a mensagem do erro
+        res.status(500).json({ 
+            message: 'Erro ao criar categoria', 
+            error: err.message 
+        });
     }
 }
+
 
 
 async atualizar(req, res) {
-  const { id } = req.params;
-  const atualizacoes = req.body;
-  
-  try {
-    const categoriaAtualizada = await CategoriasModel.atualizar(id, atualizacoes);
+    const { id } = req.params;
+    const atualizacoes = req.body;
     
-    if (categoriaAtualizada === null) {
-      return res.status(500).json({ message: 'Erro ao atualizar categoria' });
+    try {
+      const categoriaAtualizada = await CategoriasModel.atualizar(id, atualizacoes);
+      
+      if (categoriaAtualizada === null) {
+        return res.status(404).json({ message: `Categoria com ID ${id} não encontrada` });
+      }
+      
+      res.status(200).json({ message: 'Categoria atualizada com sucesso', categoria: categoriaAtualizada });
+    } catch (err) {
+      res.status(500).json({ message: 'Erro ao atualizar categoria', error: err.message });
     }
-    
-    res.status(200).json({ message: 'Usuário atualizado com categoria', usuario: usuarioAtualizado });
-  } catch (err) {
-    res.status(500).json({ message: 'Erro ao atualizar categoria', error: err.message });
   }
-}
+  
 
 
   async deletar(req, res) {
@@ -93,4 +109,4 @@ async atualizar(req, res) {
   
 }
 
-module.exports = CategoriasModel;
+module.exports = CategoriasController;
