@@ -1,6 +1,7 @@
 const express = require('express')
 const UsuariosRotas = require('./routes/UsuariosRotas');
 const CategoriasRotas = require('./routes/CategoriasRotas');
+const ProdutosRotas = require('./routes/ProdutosRotas');
 
 const host = "localhost"
 const port = 3000
@@ -14,6 +15,7 @@ app.get('/', (request, response) => {
 
 app.use(UsuariosRotas);
 app.use(CategoriasRotas);
+app.use(ProdutosRotas);
 
 app.listen(port, host, () =>{
     console.log(`Servidor executando em http://${host}:${port}`)

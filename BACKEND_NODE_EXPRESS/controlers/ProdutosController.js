@@ -1,112 +1,144 @@
-const ProdutosModel = require('../models/ProdutosModel');
+const { ProdutosModel } = require('../models/ProdutosModel');
 
 class ProdutosController {
     async listar(req, res) {
-        const { limit = 12, page = 1, fields = 'name,slug', use_in_menu } = req.query;
-      
+        const { limit = 12, page = 1, fields = 'name,slug', match, category_ids, price_range, ...options } = req.query;
+
         try {
-          // Converte os campos em um array
-          const fieldsArray = fields.split(',').map(field => field.trim());
-      
-          // Chama o método listar com os parâmetros fornecidos
-          const { rows: categorias, count } = await ProdutosModel.listar({
-            limit: parseInt(limit, 10),
-            page: parseInt(page, 10),
-            fields: fieldsArray,
-            use_in_menu
-          });
-      
-          // Prepara a resposta
-          res.status(200).json({
-            data: categorias,
-            total: count,
-            limit: parseInt(limit, 10),
-            page: parseInt(page, 10)
-          });
-        } catch (err) {
-          res.status(500).json({ message: 'Erro ao listar categorias', error: err.message });
+            const fieldsArray = fields.split(',').map(field => field.trim());
+
+            const { rows: produtos, count } = await ProdutosModel.listar({
+                limit: parseInt(limit, 10),
+                page: parseInt(page, 10),
+                fields: fieldsArray,
+                match,
+                category_ids,
+                price_range,
+                options
+            });
+
+            if (produtos.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Nenhum produto encontrado',
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                data: {
+                    produtos,
+                    total: count,
+                    totalPages: Math.ceil(count / limit)
+                }
+            });
+        } catch (error) {
+            console.error("Erro ao listar produtos:", error);
+            return res.status(500).json({
+                success: false,
+                message: 'Erro ao listar produtos',
+                error: error.message
+            });
         }
-      }
-      
-
-  async consultarPorId(req, res) {
-    const { id } = req.params;
-    try {
-      const categorias = await ProdutosModel.consultarPorId(id);
-      if (!categorias) {
-        return res.status(404).json({ message: `Categoria com ID ${id} não encontrado` });
-      }
-      res.status(200).json(categorias);
-
-    } catch (err) {
-      res.status(500).json({  requestHeaders: headers , message: 'Erro ao consultar categoria', error: err.message });
-    }
-  }
-  
-
-  async criar(req, res) {
-    const { name, slug, use_in_menu } = req.body;
-
-    // Verifica se todos os campos obrigatórios estão presentes
-    if (!name || !slug) {
-        return res.status(400).json({ message: 'Nome e slug são obrigatórios' });
     }
 
-    try {
-        // Cria a nova categoria usando o modelo
-        const categoria = await ProdutosModel.criar(name, slug, use_in_menu);
+    async consultarPorId(req, res) {
+        const { id } = req.params;
 
-        // Retorna uma resposta de sucesso com a categoria criada
-        res.status(201).json({ 
-            message: 'Categoria criada com sucesso', 
-            categoria: categoria 
-        });
-    } catch (err) {
-        // Retorna uma resposta de erro com a mensagem do erro
-        res.status(500).json({ 
-            message: 'Erro ao criar categoria', 
-            error: err.message 
-        });
+        try {
+            const produto = await ProdutosModel.consultarPorId(id);
+
+            if (!produto) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Produto não encontrado',
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                data: produto
+            });
+        } catch (error) {
+            console.error("Erro ao consultar produto por ID:", error);
+            return res.status(500).json({
+                success: false,
+                message: 'Erro ao consultar produto',
+                error: error.message
+            });
+        }
+    }
+
+    async criar(req, res) {
+        try {
+            const produto = await ProdutosModel.criar(req.body);
+            return res.status(201).json({
+                success: true,
+                data: produto
+            });
+        } catch (error) {
+            console.error("Erro ao criar produto:", error);
+            return res.status(500).json({
+                success: false,
+                message: 'Erro ao criar produto',
+                error: error.message
+            });
+        }
+    }
+
+    async atualizar(req, res) {
+        const { id } = req.params;
+
+        try {
+            const produto = await ProdutosModel.atualizar(id, req.body);
+
+            if (!produto) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Produto não encontrado',
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                data: produto
+            });
+        } catch (error) {
+            console.error("Erro ao atualizar produto:", error);
+            return res.status(500).json({
+                success: false,
+                message: 'Erro ao atualizar produto',
+                error: error.message
+            });
+        }
+    }
+
+    async deletar(req, res) {
+        const { id } = req.params;
+
+        try {
+            const resultado = await ProdutosModel.deletar(id);
+
+            if (!resultado) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Produto não encontrado',
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: resultado.message
+            });
+        } catch (error) {
+            console.error("Erro ao deletar produto:", error);
+            return res.status(500).json({
+                success: false,
+                message: 'Erro ao deletar produto',
+                error: error.message
+            });
+        }
     }
 }
 
-
-
-async atualizar(req, res) {
-    const { id } = req.params;
-    const atualizacoes = req.body;
-    
-    try {
-      const categoriaAtualizada = await ProdutosModel.atualizar(id, atualizacoes);
-      
-      if (categoriaAtualizada === null) {
-        return res.status(404).json({ message: `Categoria com ID ${id} não encontrada` });
-      }
-      
-      res.status(200).json({ message: 'Categoria atualizada com sucesso', categoria: categoriaAtualizada });
-    } catch (err) {
-      res.status(500).json({ message: 'Erro ao atualizar categoria', error: err.message });
-    }
-  }
-  
-
-
-  async deletar(req, res) {
-    const { id } = req.params;
-    
-    try {
-      const resultado = await ProdutosModel.deletar(id);
-      
-      if (resultado === null) {
-        return res.status(500).json({ message: 'Erro ao deletar categoria' });
-      }
-      
-      res.status(200).json(resultado);
-    } catch (err) {
-      res.status(500).json({ message: 'Erro ao deletar categoria', error: err.message });
-    }
-  }
-  
-}
-
-module.exports = ProdutosController;
+module.exports = new ProdutosController();

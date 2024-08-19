@@ -1,8 +1,8 @@
-/*const { Sequelize } = require('sequelize');*/
+const { DataTypes, Op } = require("sequelize");
 const connection = require('../config/connection');
-const { DataTypes } = require("sequelize");
+const CategoriasModel = require('../models/CategoriasModel');
 
-
+// Definindo o modelo de Produtos
 const ProdutosModel = connection.define("produto", {
     id: {
         type: DataTypes.INTEGER,
@@ -11,7 +11,7 @@ const ProdutosModel = connection.define("produto", {
     },
     enabled: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false // Valor padrão 0
+        defaultValue: false
     },
     name: {
         type: DataTypes.STRING,
@@ -29,11 +29,11 @@ const ProdutosModel = connection.define("produto", {
     },
     use_in_menu: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false // Valor padrão 0
+        defaultValue: false
     },
     stock: {
         type: DataTypes.INTEGER,
-        defaultValue: 0 // Valor padrão 0
+        defaultValue: 0
     },
     description: {
         type: DataTypes.STRING,
@@ -52,7 +52,7 @@ const ProdutosModel = connection.define("produto", {
     tableName: 'produto'
 });
 
-
+// Definindo o modelo de Imagens
 const ImagensModel = connection.define("imagem_produto", {
     id: {
         type: DataTypes.INTEGER,
@@ -62,27 +62,28 @@ const ImagensModel = connection.define("imagem_produto", {
     product_id: {
         type: DataTypes.INTEGER,
         references: {
-            model: ProdutosModel, // Referência à tabela de produtos
+            model: ProdutosModel,
             key: 'id'
         },
-        allowNull: false // Preenchimento obrigatório
+        allowNull: false
     },
     enabled: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false // Valor padrão 0
+        defaultValue: false
     },
     path: {
         type: DataTypes.STRING,
-        allowNull: false, // Preenchimento obrigatório
+        allowNull: false,
         validate: {
-            notEmpty: true // Não pode ser vazio
+            notEmpty: true
         }
     }
 }, {
-    timestamps: true, // Gera as colunas created_at e updated_at
+    timestamps: true,
     tableName: 'imagem_produto'
 });
 
+// Definindo o modelo de Opções
 const OpcoesModel = connection.define("opcao_produto", {
     id: {
         type: DataTypes.INTEGER,
@@ -91,156 +92,229 @@ const OpcoesModel = connection.define("opcao_produto", {
     },
     product_id: {
         type: DataTypes.INTEGER,
-        allowNull: false, // Preenchimento obrigatório
+        allowNull: false,
         references: {
-            model: ProdutosModel, // Referência à tabela de produtos
+            model: ProdutosModel,
             key: 'id'
         }
     },
     title: {
         type: DataTypes.STRING,
-        allowNull: false, // Preenchimento obrigatório
+        allowNull: false,
         validate: {
-            notEmpty: true // Não pode ser vazio
+            notEmpty: true
         }
     },
     shape: {
         type: DataTypes.ENUM('square', 'circle'),
-        defaultValue: 'square' // Valor padrão
+        defaultValue: 'square'
     },
     radius: {
         type: DataTypes.INTEGER,
-        defaultValue: 0 // Valor padrão
+        defaultValue: 0
     },
     type: {
         type: DataTypes.ENUM('text', 'color'),
-        defaultValue: 'text' // Valor padrão
+        defaultValue: 'text'
     },
     values: {
         type: DataTypes.STRING,
-        allowNull: false, // Preenchimento obrigatório
+        allowNull: false,
         validate: {
-            notEmpty: true // Não pode ser vazio
+            notEmpty: true
         }
     }
 }, {
-    timestamps: true, // Gera as colunas created_at e updated_at
+    timestamps: true,
     tableName: 'opcao_produto'
 });
 
+// Definindo o modelo de CategoriaProduto
 const ProdutoCategoriaModel = connection.define("produto_categoria", {
     product_id: {
         type: DataTypes.INTEGER,
-        allowNull: false, // Preenchimento obrigatório
+        allowNull: false,
         references: {
-            model: ProdutosModel, // Referência à tabela de produtos
+            model: ProdutosModel,
             key: 'id'
         }
     },
     category_id: {
         type: DataTypes.INTEGER,
-        allowNull: false, // Preenchimento obrigatório
+        allowNull: false,
         references: {
-            model: CategoriasModel, // Referência à tabela de categorias
+            model: 'categoria', // Supondo que CategoriasModel está definida em algum lugar
             key: 'id'
         }
     }
 }, {
-    timestamps: true, // Gera as colunas created_at e updated_at
-    tableName: 'opcao_produto'
+    timestamps: true,
+    tableName: 'produto_categoria'
 });
 
+// Métodos customizados para ProdutosModel
+ProdutosModel.criar = async (dadosProduto) => {
+    const transaction = await connection.transaction();
 
-
-ProdutosModel.criar = async (name, slug, use_in_menu) => {
     try {
-        const produto = await ProdutosModel.create({ name, slug, use_in_menu });
+        const produto = await ProdutosModel.create(dadosProduto, { transaction });
+
+        if (dadosProduto.category_ids && dadosProduto.category_ids.length > 0) {
+            await produto.setCategorias(dadosProduto.category_ids, { transaction });
+        }
+
+        if (dadosProduto.images && dadosProduto.images.length > 0) {
+            for (const image of dadosProduto.images) {
+                await ImagensModel.create({
+                    product_id: produto.id,
+                    path: image.content,
+                }, { transaction });
+            }
+        }
+
+        if (dadosProduto.options && dadosProduto.options.length > 0) {
+            for (const option of dadosProduto.options) {
+                await OpcoesModel.create({
+                    product_id: produto.id,
+                    title: option.title,
+                    shape: option.shape || 'square',
+                    radius: option.radius || 0,
+                    type: option.type || 'text',
+                    values: option.values.join(','),
+                }, { transaction });
+            }
+        }
+
+        await transaction.commit();
         return produto;
     } catch (error) {
-        console.error("Erro ao criar categoria:", error);
-        throw error; // Lance o erro para ser tratado no controller
+        await transaction.rollback();
+        console.error("Erro ao criar produto:", error);
+        throw error;
     }
 };
 
 ProdutosModel.atualizar = async (id, atualizacoes) => {
     try {
-      // Encontra a categoria pelo ID
-      const produto = await ProdutosModel.findByPk(id);
-  
-      // Verifica se a categoria foi encontrada
-      if (!categoria) {
-        throw new Error(`Categoria com ID ${id} não encontrada`);
-      }
-  
-      // Atualiza os dados da categoria com as novas informações
-      await produto.update(atualizacoes);
-  
-      return produto; // Retorna a categoria atualizada
+        const produto = await ProdutosModel.findByPk(id);
+
+        if (!produto) {
+            throw new Error(`Produto com ID ${id} não encontrado`);
+        }
+
+        await produto.update(atualizacoes);
+        return produto;
     } catch (error) {
-      console.error("Erro ao atualizar categoria:", error);
-      return null;
+        console.error("Erro ao atualizar produto:", error);
+        return null;
     }
-  };
-  
+};
 
+ProdutosModel.listar = async (params) => {
+    const { limit = 12, page = 1, fields = [], match, category_ids, price_range, options = {} } = params;
 
-
-  ProdutosModel.listar = async ({ limit = 12, page = 1, fields = [], use_in_menu } = {}) => {
     try {
         const queryOptions = {
-            attributes: fields.length ? fields : undefined, // Seleciona apenas os campos especificados
+            attributes: fields.length ? fields : undefined,
             where: {},
-            limit: limit === -1 ? undefined : limit, // Remove limite se limit for -1
-            offset: limit === -1 ? undefined : (page - 1) * limit // Calcula o offset para paginação
+            include: [
+                {
+                    model: ProdutoCategoriaModel,
+                    attributes: ['category_id'],
+                    where: category_ids ? { category_id: category_ids.split(',').map(id => parseInt(id)) } : undefined
+                },
+                {
+                    model: ImagensModel,
+                    attributes: ['id', 'path']
+                },
+                {
+                    model: OpcoesModel,
+                    attributes: ['id', 'title', 'values'],
+                    where: Object.keys(options).length ? {
+                        [Op.and]: Object.keys(options).map(optionId => ({
+                            id: optionId,
+                            values: {
+                                [Op.in]: options[optionId].split(',')
+                            }
+                        }))
+                    } : undefined
+                }
+            ],
+            limit: limit === -1 ? undefined : limit,
+            offset: limit === -1 ? undefined : (page - 1) * limit
         };
 
-        if (use_in_menu !== undefined) {
-            queryOptions.where.use_in_menu = use_in_menu === 'true'; // Filtra pelas categorias que podem aparecer no menu
+        if (match) {
+            queryOptions.where[Op.or] = [
+                { name: { [Op.like]: `%${match}%` } },
+                { description: { [Op.like]: `%${match}%` } }
+            ];
+        }
+
+        if (price_range) {
+            const [min, max] = price_range.split('-').map(value => parseFloat(value));
+            queryOptions.where.price = {
+                [Op.between]: [min, max]
+            };
         }
 
         const produtos = await ProdutosModel.findAndCountAll(queryOptions);
         return produtos;
     } catch (error) {
-        console.error("Erro ao listar categorias:", error);
+        console.error("Erro ao listar produtos:", error);
         return null;
     }
 };
 
-
 ProdutosModel.consultarPorId = async (id) => {
     try {
-        const produto = await ProdutosModel.findByPk(id);
+        const produto = await ProdutosModel.findByPk(id, {
+            include: [
+                {
+                    model: ProdutoCategoriaModel,
+                    attributes: ['category_id']
+                },
+                {
+                    model: ImagensModel,
+                    attributes: ['id', 'path']
+                },
+                {
+                    model: OpcoesModel,
+                    attributes: ['id', 'title', 'values']
+                }
+            ]
+        });
+
         if (!produto) {
-            throw new Error(`Categoria com ID ${id} não encontrado`);
+            throw new Error(`Produto com ID ${id} não encontrado`);
         }
+
         return produto;
     } catch (error) {
-        console.error("Erro ao consultar categoria por ID:", error);
+        console.error("Erro ao consultar produto por ID:", error);
         return null;
     }
 };
 
 ProdutosModel.deletar = async (id) => {
     try {
-        // Encontra o usuário pelo ID
         const produto = await ProdutosModel.findByPk(id);
 
-        // Verifica se o usuário foi encontrado
         if (!produto) {
-            throw new Error(`Categoria com ID ${id} não encontrado`);
+            throw new Error(`Produto com ID ${id} não encontrado`);
         }
 
-        // Deleta o usuário
         await produto.destroy();
-        return { message: `Categoria com ID ${id} deletado com sucesso` };
+        return { message: `Produto com ID ${id} deletado com sucesso` };
     } catch (error) {
-        console.error("Erro ao deletar categoria:", error);
+        console.error("Erro ao deletar produto:", error);
         return null;
     }
 };
 
+// Definição de associações
+ProdutosModel.belongsToMany(CategoriasModel, { through: ProdutoCategoriaModel, foreignKey: 'product_id' });
+ProdutosModel.hasMany(ImagensModel, { foreignKey: 'product_id' });
+ProdutosModel.hasMany(OpcoesModel, { foreignKey: 'product_id' });
 
-
-
-
-module.exports = {ProdutosModel, ImagensModel, OpcoesModel, ProdutoCategoriaModel };
+module.exports = { ProdutosModel, ImagensModel, OpcoesModel, ProdutoCategoriaModel };
