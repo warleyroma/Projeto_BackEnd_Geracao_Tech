@@ -175,6 +175,51 @@ ProdutosModel.deletar = async (id) => {
     }
 };
 
+const OpcoesModel = connection.define("opcao_produto", {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
+    product_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false, // Preenchimento obrigatório
+        references: {
+            model: ProdutosModel, // Referência à tabela de produtos
+            key: 'id'
+        }
+    },
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false, // Preenchimento obrigatório
+        validate: {
+            notEmpty: true // Não pode ser vazio
+        }
+    },
+    shape: {
+        type: DataTypes.ENUM('square', 'circle'),
+        defaultValue: 'square' // Valor padrão
+    },
+    radius: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0 // Valor padrão
+    },
+    type: {
+        type: DataTypes.ENUM('text', 'color'),
+        defaultValue: 'text' // Valor padrão
+    },
+    values: {
+        type: DataTypes.STRING,
+        allowNull: false, // Preenchimento obrigatório
+        validate: {
+            notEmpty: true // Não pode ser vazio
+        }
+    }
+}, {
+    timestamps: true, // Gera as colunas created_at e updated_at
+    tableName: 'opcao_produto'
+});
 
 
-module.exports = {ProdutosModel, ImagensModel, };
+
+module.exports = {ProdutosModel, ImagensModel, OpcoesModel, };
