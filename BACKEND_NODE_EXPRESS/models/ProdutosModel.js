@@ -83,8 +83,72 @@ const ImagensModel = connection.define("imagem_produto", {
     tableName: 'imagem_produto'
 });
 
+const OpcoesModel = connection.define("opcao_produto", {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
+    product_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false, // Preenchimento obrigatório
+        references: {
+            model: ProdutosModel, // Referência à tabela de produtos
+            key: 'id'
+        }
+    },
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false, // Preenchimento obrigatório
+        validate: {
+            notEmpty: true // Não pode ser vazio
+        }
+    },
+    shape: {
+        type: DataTypes.ENUM('square', 'circle'),
+        defaultValue: 'square' // Valor padrão
+    },
+    radius: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0 // Valor padrão
+    },
+    type: {
+        type: DataTypes.ENUM('text', 'color'),
+        defaultValue: 'text' // Valor padrão
+    },
+    values: {
+        type: DataTypes.STRING,
+        allowNull: false, // Preenchimento obrigatório
+        validate: {
+            notEmpty: true // Não pode ser vazio
+        }
+    }
+}, {
+    timestamps: true, // Gera as colunas created_at e updated_at
+    tableName: 'opcao_produto'
+});
 
-
+const ProdutoCategoriaModel = connection.define("produto_categoria", {
+    product_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false, // Preenchimento obrigatório
+        references: {
+            model: ProdutosModel, // Referência à tabela de produtos
+            key: 'id'
+        }
+    },
+    category_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false, // Preenchimento obrigatório
+        references: {
+            model: CategoriasModel, // Referência à tabela de categorias
+            key: 'id'
+        }
+    }
+}, {
+    timestamps: true, // Gera as colunas created_at e updated_at
+    tableName: 'opcao_produto'
+});
 
 
 
@@ -175,51 +239,8 @@ ProdutosModel.deletar = async (id) => {
     }
 };
 
-const OpcoesModel = connection.define("opcao_produto", {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
-    },
-    product_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false, // Preenchimento obrigatório
-        references: {
-            model: ProdutosModel, // Referência à tabela de produtos
-            key: 'id'
-        }
-    },
-    title: {
-        type: DataTypes.STRING,
-        allowNull: false, // Preenchimento obrigatório
-        validate: {
-            notEmpty: true // Não pode ser vazio
-        }
-    },
-    shape: {
-        type: DataTypes.ENUM('square', 'circle'),
-        defaultValue: 'square' // Valor padrão
-    },
-    radius: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0 // Valor padrão
-    },
-    type: {
-        type: DataTypes.ENUM('text', 'color'),
-        defaultValue: 'text' // Valor padrão
-    },
-    values: {
-        type: DataTypes.STRING,
-        allowNull: false, // Preenchimento obrigatório
-        validate: {
-            notEmpty: true // Não pode ser vazio
-        }
-    }
-}, {
-    timestamps: true, // Gera as colunas created_at e updated_at
-    tableName: 'opcao_produto'
-});
 
 
 
-module.exports = {ProdutosModel, ImagensModel, OpcoesModel, };
+
+module.exports = {ProdutosModel, ImagensModel, OpcoesModel, ProdutoCategoriaModel };
