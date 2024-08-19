@@ -53,6 +53,39 @@ const ProdutosModel = connection.define("produto", {
 });
 
 
+const ImagensModel = connection.define("imagem_produto", {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
+    product_id: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: ProdutosModel, // Referência à tabela de produtos
+            key: 'id'
+        },
+        allowNull: false // Preenchimento obrigatório
+    },
+    enabled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false // Valor padrão 0
+    },
+    path: {
+        type: DataTypes.STRING,
+        allowNull: false, // Preenchimento obrigatório
+        validate: {
+            notEmpty: true // Não pode ser vazio
+        }
+    }
+}, {
+    timestamps: true, // Gera as colunas created_at e updated_at
+    tableName: 'imagem_produto'
+});
+
+
+
+
 
 
 ProdutosModel.criar = async (name, slug, use_in_menu) => {
@@ -144,4 +177,4 @@ ProdutosModel.deletar = async (id) => {
 
 
 
-module.exports = ProdutosModel;
+module.exports = {ProdutosModel, ImagensModel, };
