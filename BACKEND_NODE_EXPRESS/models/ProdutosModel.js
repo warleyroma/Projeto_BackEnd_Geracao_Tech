@@ -1,6 +1,6 @@
 const { DataTypes, Op } = require("sequelize");
 const connection = require('../config/connection');
-const CategoriasModel = require('../models/CategoriasModel');
+const CategoriasModel = require('./CategoriasModel');
 
 // Definindo o modelo de Produtos
 const ProdutosModel = connection.define("produto", {
@@ -143,7 +143,7 @@ const ProdutoCategoriaModel = connection.define("produto_categoria", {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'categoria', // Supondo que CategoriasModel está definida em algum lugar
+            model: CategoriasModel, // Corrigido para o modelo Categoria
             key: 'id'
         }
     }
@@ -152,17 +152,24 @@ const ProdutoCategoriaModel = connection.define("produto_categoria", {
     tableName: 'produto_categoria'
 });
 
+
 // Métodos customizados para ProdutosModel
 ProdutosModel.criar = async (dadosProduto) => {
     const transaction = await connection.transaction();
 
     try {
+        // Cria o produto
         const produto = await ProdutosModel.create(dadosProduto, { transaction });
 
+        // Adiciona as categorias associadas
         if (dadosProduto.category_ids && dadosProduto.category_ids.length > 0) {
-            await produto.setCategorias(dadosProduto.category_ids, { transaction });
+            const categories = await CategoriasModel.findAll({
+                where: { id: dadosProduto.category_ids }
+            });
+            await produto.addProdutoCategorias(categories, { transaction });
         }
 
+        // Adiciona as imagens associadas
         if (dadosProduto.images && dadosProduto.images.length > 0) {
             for (const image of dadosProduto.images) {
                 await ImagensModel.create({
@@ -172,6 +179,7 @@ ProdutosModel.criar = async (dadosProduto) => {
             }
         }
 
+        // Adiciona as opções associadas
         if (dadosProduto.options && dadosProduto.options.length > 0) {
             for (const option of dadosProduto.options) {
                 await OpcoesModel.create({
@@ -185,14 +193,17 @@ ProdutosModel.criar = async (dadosProduto) => {
             }
         }
 
+        // Comita a transação
         await transaction.commit();
         return produto;
     } catch (error) {
+        // Rollback da transação em caso de erro
         await transaction.rollback();
         console.error("Erro ao criar produto:", error);
         throw error;
     }
 };
+
 
 ProdutosModel.atualizar = async (id, atualizacoes) => {
     try {
@@ -219,16 +230,16 @@ ProdutosModel.listar = async (params) => {
             where: {},
             include: [
                 {
-                    model: ProdutoCategoriaModel,
-                    attributes: ['category_id'],
-                    where: category_ids ? { category_id: category_ids.split(',').map(id => parseInt(id)) } : undefined
+                    model: ProdutoCategoriaModel, as: 'categorias',
+                    attributes: ['id', 'name'],
+                    where: category_ids ? { id: category_ids.split(',').map(id => parseInt(id)) } : undefined
                 },
                 {
-                    model: ImagensModel,
-                    attributes: ['id', 'path']
+                    model: ImagensModel, as:'imagens',
+                    attributes: ['id', 'path', 'enabled']
                 },
                 {
-                    model: OpcoesModel,
+                    model: OpcoesModel,as: 'opcoes',
                     attributes: ['id', 'title', 'values'],
                     where: Object.keys(options).length ? {
                         [Op.and]: Object.keys(options).map(optionId => ({
@@ -312,9 +323,35 @@ ProdutosModel.deletar = async (id) => {
     }
 };
 
+
 // Definição de associações
-ProdutosModel.belongsToMany(CategoriasModel, { through: ProdutoCategoriaModel, foreignKey: 'product_id' });
-ProdutosModel.hasMany(ImagensModel, { foreignKey: 'product_id' });
-ProdutosModel.hasMany(OpcoesModel, { foreignKey: 'product_id' });
+ProdutosModel.belongsToMany(CategoriasModel, { 
+    through: ProdutoCategoriaModel, 
+    foreignKey: 'product_id' ,
+    otherKey: 'category_id'
+});
+
+CategoriasModel.belongsToMany(ProdutosModel, { 
+    through: ProdutoCategoriaModel, 
+    foreignKey: 'category_id',
+    otherKey: 'product_id' 
+});
+
+ProdutosModel.hasMany(ImagensModel, { 
+    foreignKey: 'product_id' 
+});
+
+ProdutosModel.hasMany(OpcoesModel, { 
+    foreignKey: 'product_id' 
+});
+
+ProdutoCategoriaModel.belongsTo(ProdutosModel, { 
+    foreignKey: 'product_id' 
+});
+
+ProdutoCategoriaModel.belongsTo(CategoriasModel, { 
+    foreignKey: 'category_id' 
+});
+
 
 module.exports = { ProdutosModel, ImagensModel, OpcoesModel, ProdutoCategoriaModel };

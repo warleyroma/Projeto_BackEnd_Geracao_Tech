@@ -4,4 +4,4 @@ require('../models/UsuarioModel');
 require('../models/CategoriasModel');
 
 
-connection.sync({force:true});
+connection.sync({ alter: true }); // Altera a tabela para refletir o novo modelo

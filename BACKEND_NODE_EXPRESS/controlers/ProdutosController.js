@@ -70,21 +70,26 @@ class ProdutosController {
     }
 
     async criar(req, res) {
-        try {
-            const produto = await ProdutosModel.criar(req.body);
-            return res.status(201).json({
-                success: true,
-                data: produto
-            });
-        } catch (error) {
-            console.error("Erro ao criar produto:", error);
-            return res.status(500).json({
-                success: false,
-                message: 'Erro ao criar produto',
-                error: error.message
-            });
-        }
-    }
+      try {
+          // Chama o método 'criar' do modelo ProdutosModel, passando o corpo da requisição
+          const produto = await ProdutosModel.criar(req.body);
+  
+          // Se a criação for bem-sucedida, retorna um status 201 com a informação do produto criado
+          return res.status(201).json({
+              success: true,
+              data: produto
+          });
+      } catch (error) {
+          // Se ocorrer um erro durante a criação, registra o erro e retorna um status 500
+          console.error("Erro ao criar produto:", error);
+          return res.status(500).json({
+              success: false,
+              message: 'Erro ao criar produto',
+              error: error.message
+          });
+      }
+  }
+  
 
     async atualizar(req, res) {
         const { id } = req.params;
