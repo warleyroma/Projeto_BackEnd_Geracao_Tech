@@ -2,6 +2,7 @@ const { DataTypes, Op } = require("sequelize");
 const connection = require('../config/connection');
 const CategoriasModel = require('./CategoriasModel');
 
+
 // Definindo o modelo de Produtos
 const ProdutosModel = connection.define("produto", {
     id: {
@@ -91,8 +92,8 @@ const OpcoesModel = connection.define("opcao_produto", {
     },
     title: {
         type: DataTypes.STRING,
-        allowNull: false
-    },
+        allowNull: false,
+      },
     shape: {
         type: DataTypes.ENUM('square', 'circle'),
         defaultValue: 'square'

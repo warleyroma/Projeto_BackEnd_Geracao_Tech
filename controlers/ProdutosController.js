@@ -1,4 +1,5 @@
 const { ProdutosModel, ImagensModel, OpcoesModel, ProdutoCategoriaModel } = require('../models/ProdutosModel');
+const CategoriasModel = require('../models/CategoriasModel');
 const { validarToken } = require('../middlewares/auth');
 
 // Listar produtos
