@@ -1,4 +1,5 @@
 const UsuariosModel = require('../models/UsuarioModel');
+const { validarToken } = require('../middlewares/auth');
 
 class UsuariosControler {
   async listar(req, res) {

@@ -65,6 +65,7 @@ const listar = async (req, res) => {
 // Obter produto por ID
 const consultarPorId = async (req, res) => {
     const { id } = req.params;
+    console.log(`Consultando produto com ID: ${id}`);
 
     try {
         const produto = await ProdutosModel.findByPk(id, {
@@ -83,6 +84,8 @@ const consultarPorId = async (req, res) => {
                 }
             ]
         });
+
+        console.log('Produto encontrado:', produto);
 
         if (!produto) {
             return res.status(404).json({ message: `Produto com ID ${id} não encontrado` });
@@ -121,7 +124,7 @@ const atualizar = async (req, res) => {
         }
 
         await produto.update(atualizacoes);
-        res.status(204).end();
+        res.status(200).json({ message: 'Produto atualizado com sucesso', produto });
     } catch (error) {
         console.error("Erro ao atualizar produto:", error);
         res.status(400).json({ message: "Erro ao atualizar produto" });
@@ -140,7 +143,7 @@ const deletar = async (req, res) => {
         }
 
         await produto.destroy();
-        res.status(204).end();
+        res.status(200).json({ message: 'Produto deletado com sucesso' });
     } catch (error) {
         console.error("Erro ao deletar produto:", error);
         res.status(400).json({ message: "Erro ao deletar produto" });

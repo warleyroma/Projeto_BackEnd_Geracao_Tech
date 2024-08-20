@@ -1,4 +1,5 @@
 const CategoriasModel = require('../models/CategoriasModel');
+const { validarToken } = require('../middlewares/auth');
 
 class CategoriasController {
     async listar(req, res) {
