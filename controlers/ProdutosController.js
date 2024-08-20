@@ -11,9 +11,12 @@ const listar = async (req, res) => {
             where: {},
             include: [
                 {
-                    model: ProdutoCategoriaModel,
-                    attributes: ['category_id'],
-                    where: category_ids ? { category_id: category_ids.split(',').map(id => parseInt(id)) } : undefined
+                    model: CategoriasModel,
+                    attributes: ['id', 'name'], // Ajuste para incluir a categoria diretamente
+                    through: {
+                        attributes: ['category_id'], 
+                        where: category_ids ? { category_id: category_ids.split(',').map(id => parseInt(id)) } : undefined
+                    }
                 },
                 {
                     model: ImagensModel,
@@ -96,7 +99,7 @@ const criar = async (req, res) => {
     const dadosProduto = req.body;
 
     try {
-        const produto = await ProdutosModel.criar(dadosProduto);
+        const produto = await ProdutosModel.create(dadosProduto);
         res.status(201).json(produto);
     } catch (error) {
         console.error("Erro ao criar produto:", error);
