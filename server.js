@@ -1,35 +1,22 @@
-const { createServer } = require('node:http');
-const listarProdutos = require('./routes/produtos');
+const express = require('express')
+const UsuariosRotas = require('./routes/UsuariosRotas');
+const CategoriasRotas = require('./routes/CategoriasRotas');
+const ProdutosRotas = require('./routes/ProdutosRotas');
 
-const host = '127.0.0.1';
-const port = 3000;
+const host = "localhost"
+const port = 3000
 
-const app = createServer((request, response) => {
+const app = express()
+app.use(express.json())
 
-    const { url, method } = request
-
-    if (url === '/'){
-        response.writeHead(200, {'Content-Type': 'text/plain'});
-        return response.end ("Olá NodeJS, servidor OK.");
-    }
-
-    
-    if (url === '/produtos'){
-
-        const dados = listarProdutos();
-
-        response.writeHead(200, {'Content-Type': 'application/json'});
-        return response.end (JSON.stringify(dados));
-    }
-
-
-    response.writeHead(404, { 'Content-Type': 'text/plain' });
-    return response.end('Página não encontrada');
+app.get('/', (request, response) => {
+    return response.send ("Olá, eu sou um Backend com NodeJS + Express")
 });
 
-app.listen(port, host, () => {
-    console.log(`PARABÉNS! Servidor executando http://${host}:${port}`)
+app.use(UsuariosRotas);
+app.use(CategoriasRotas);
+app.use(ProdutosRotas);
+
+app.listen(port, host, () =>{
+    console.log(`Servidor executando em http://${host}:${port}`)
 });
-
-
-
