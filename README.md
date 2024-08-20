@@ -1,6 +1,6 @@
-#Projeto Back End Geração Tech - Loja Virtual
+# Projeto Back End Geração Tech - Loja Virtual
 Descrição
-##Este projeto tem como objetivo demontrar os conhecimentos obtidos no decorrer do módulo back end do curso de desenvolvimento fullstack Geração Tech.
+## Este projeto tem como objetivo demontrar os conhecimentos obtidos no decorrer do módulo back end do curso de desenvolvimento fullstack Geração Tech.
 
 Começando
 Pré-requisitos
