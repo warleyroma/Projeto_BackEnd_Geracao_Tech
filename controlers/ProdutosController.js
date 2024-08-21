@@ -65,14 +65,14 @@ const listar = async (req, res) => {
 // Obter produto por ID
 const consultarPorId = async (req, res) => {
     const { id } = req.params;
-    console.log(`Consultando produto com ID: ${id}`);
 
     try {
         const produto = await ProdutosModel.findByPk(id, {
             include: [
                 {
-                    model: ProdutoCategoriaModel,
-                    attributes: ['category_id']
+                    model: CategoriasModel,
+                    attributes: ['name', 'slug'], // Inclua outros campos necessários
+                    through: { attributes: [] } // Exclua os atributos da tabela intermediária se não forem necessários
                 },
                 {
                     model: ImagensModel,
@@ -85,8 +85,6 @@ const consultarPorId = async (req, res) => {
             ]
         });
 
-        console.log('Produto encontrado:', produto);
-
         if (!produto) {
             return res.status(404).json({ message: `Produto com ID ${id} não encontrado` });
         }
@@ -97,6 +95,7 @@ const consultarPorId = async (req, res) => {
         res.status(400).json({ message: "Erro ao obter produto por ID" });
     }
 };
+
 
 // Criar produto
 const criar = async (req, res) => {
