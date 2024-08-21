@@ -4,19 +4,19 @@ Descrição
 
 Começando
 Pré-requisitos
-Sistema operacional Windows ou linux
-Github desktop instalado ou git tradicional via prompt de comando
-Visual Code Studio instalado
-Node.js instalado
-Nodemon instalado
-Express Instalado
-Instalação
-Instale o Github desktop ou Git tradicional
-Faça o clone deste projeto em sua maquina
-Instale o visual studio code
-Abra a pasta do projeto com o visual studio code
-instale o node.js e o vite
-Execute o projeto com o comando npm run dev
+- Sistema operacional Windows ou linux
+- Github desktop instalado ou git tradicional via prompt de comando
+- Visual Code Studio instalado
+- Node.js instalado
+- Nodemon instalado
+- Express Instalado
+- Instalação
+- Instale o Github desktop ou Git tradicional
+- Faça o clone deste projeto em sua maquina
+- Instale o visual studio code
+- Abra a pasta do projeto com o visual studio code
+- instale o node.js e o vite
+- Execute o projeto com o comando npm start
 Autor
 Warleyson Costa Roma
 
