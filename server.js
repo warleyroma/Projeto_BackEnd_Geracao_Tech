@@ -3,12 +3,21 @@ const UsuariosRotas = require('./routes/UsuariosRotas');
 const CategoriasRotas = require('./routes/CategoriasRotas');
 const ProdutosRotas = require('./routes/ProdutosRotas');
 const connection = require('./config/connection');
+const cors = require('cors');
+
 
 const host = "localhost"
 const port = 3000
 
 const app = express()
+
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+  }));
+  
 app.use(express.json())
+
 
 app.get('/', (request, response) => {
     return response.send ("Olá, eu sou um Backend com NodeJS + Express")
@@ -31,7 +40,12 @@ async function startServer() {
     }
 }
 
+
+
+
 startServer();
+
+
 
 /*
 app.listen(port, host, () =>{
