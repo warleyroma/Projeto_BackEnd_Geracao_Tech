@@ -1,7 +1,6 @@
-/*const { Sequelize } = require('sequelize');*/
 const connection = require('../config/connection');
 const { DataTypes } = require("sequelize");
-
+const bcrypt = require('bcrypt');
 
 const UsuariosModel = connection.define("User", {
   id: {
@@ -30,10 +29,13 @@ const UsuariosModel = connection.define("User", {
   timestamps: true, // Cria as colunas 'created_at' e 'updated_at'
 });
 
-
+// Método para criar um novo usuário
 UsuariosModel.criar = async (firstname, surname, email, password) => {
   try {
-    const usuario = await UsuariosModel.create({ firstname, surname, email, password });
+    // Hash da senha
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const usuario = await UsuariosModel.create({ firstname, surname, email, password: hashedPassword });
     return usuario;
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
@@ -41,6 +43,7 @@ UsuariosModel.criar = async (firstname, surname, email, password) => {
   }
 };
 
+// Método para atualizar um usuário
 UsuariosModel.atualizar = async (id, atualizacoes) => {
   try {
     // Encontra o usuário pelo ID
@@ -61,8 +64,7 @@ UsuariosModel.atualizar = async (id, atualizacoes) => {
   }
 };
 
-
-
+// Método para listar todos os usuários
 UsuariosModel.listar = async () => {
   try {
     const usuarios = await UsuariosModel.findAll();
@@ -73,6 +75,7 @@ UsuariosModel.listar = async () => {
   }
 };
 
+// Método para consultar um usuário por ID
 UsuariosModel.consultarPorId = async (id) => {
   try {
     const usuario = await UsuariosModel.findByPk(id);
@@ -86,6 +89,21 @@ UsuariosModel.consultarPorId = async (id) => {
   }
 };
 
+// Método para consultar um usuário por email
+UsuariosModel.consultarPorEmail = async (email) => {
+  try {
+    const usuario = await UsuariosModel.findOne({ where: { email } });
+    if (!usuario) {
+      throw new Error(`Usuário com email ${email} não encontrado`);
+    }
+    return usuario;
+  } catch (error) {
+    console.error("Erro ao consultar usuário por email:", error);
+    return null;
+  }
+};
+
+// Método para deletar um usuário
 UsuariosModel.deletar = async (id) => {
   try {
     // Encontra o usuário pelo ID
@@ -105,6 +123,15 @@ UsuariosModel.deletar = async (id) => {
   }
 };
 
-
+// Método para validar a senha de um usuário
+UsuariosModel.prototype.validarSenha = async function (senha) {
+  try {
+    const isValid = await bcrypt.compare(senha, this.password);
+    return isValid;
+  } catch (error) {
+    console.error("Erro ao validar senha:", error);
+    return false;
+  }
+};
 
 module.exports = UsuariosModel;
