@@ -29,6 +29,7 @@ UsuariosRotas.post('/v1/login', async (req, res) => {
   return res.send({ token });
 });
 
+
 // registro
 UsuariosRotas.post('/v1/register', async (req, res) => {
   const { nome, email, senha } = req.body;
