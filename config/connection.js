@@ -28,7 +28,7 @@ const dbConfig = {
   }
 };
 
-const dbType = 'mysql'; // ou 'mysql' ou 'postgres'
+const dbType = 'postgres'; // ou 'mysql' ou 'postgres'
 
 connection = new Sequelize(dbConfig[dbType]);
 
@@ -42,7 +42,61 @@ async function testConnection() {
   }
 }
 
-//testConnection();
+/*async function listTables() {
+    try {
+      let query;
+      if (dbType === 'mysql') {
+        query = 'SHOW TABLES';
+      } else if (dbType === 'postgres') {
+        query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'";
+      } else {
+        throw new Error('Unsupported database type');
+      }
+  
+      const [results] = await connection.query(query);
+      console.log('Tables:', results);
+    } catch (error) {
+      console.error('Error listing tables:', error);
+    }
+  }
+
+
+async function executeQuery() {
+    try {
+      const [results, metadata] = await connection.query('SELECT * FROM users');
+      console.log('Results:', results);
+      console.log('Metadata:', metadata);
+    } catch (error) {
+      console.error('Error executing query:', error);
+    }
+  }
+
+
+testConnection();
+listTables();
+
+executeQuery();
+*/
+async function listTables() {
+    try {
+      let query;
+      if (dbType === 'mysql') {
+        query = 'SHOW TABLES';
+      } else if (dbType === 'postgres') {
+        query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'";
+      } else {
+        throw new Error('Unsupported database type');
+      }
+  
+      const [results] = await connection.query(query);
+      console.log('Tables:', results);
+    } catch (error) {
+      console.error('Error listing tables:', error);
+    }
+  }
+testConnection();
+listTables();
+
 
 connection.sync({ force: true });
 

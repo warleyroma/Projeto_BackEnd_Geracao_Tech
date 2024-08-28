@@ -5,6 +5,7 @@ const ProdutosRotas = require('./routes/ProdutosRotas');
 const connection = require('./config/connection');
 const cors = require('cors');
 const { validarToken } = require('./middlewares/auth');
+require('./scripts/syncModels');
 
 const host = "localhost";
 const port = 3000;

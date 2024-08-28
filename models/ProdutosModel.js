@@ -1,7 +1,6 @@
-const { DataTypes, Op } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const connection = require('../config/connection');
 const CategoriasModel = require('./CategoriasModel');
-
 
 // Definindo o modelo de Produtos
 const ProdutosModel = connection.define("produto", {
@@ -93,7 +92,7 @@ const OpcoesModel = connection.define("opcao_produto", {
     title: {
         type: DataTypes.STRING,
         allowNull: false,
-      },
+    },
     shape: {
         type: DataTypes.ENUM('square', 'circle'),
         defaultValue: 'square'
@@ -142,29 +141,35 @@ const ProdutoCategoriaModel = connection.define("produto_categoria", {
 ProdutosModel.belongsToMany(CategoriasModel, { 
     through: ProdutoCategoriaModel, 
     foreignKey: 'product_id',
-    otherKey: 'category_id'
+    otherKey: 'category_id',
+    onDelete: 'CASCADE'
 });
 
 CategoriasModel.belongsToMany(ProdutosModel, { 
     through: ProdutoCategoriaModel, 
     foreignKey: 'category_id',
-    otherKey: 'product_id'
+    otherKey: 'product_id',
+    onDelete: 'CASCADE'
 });
 
 ProdutosModel.hasMany(ImagensModel, { 
-    foreignKey: 'product_id'
+    foreignKey: 'product_id',
+    onDelete: 'CASCADE'
 });
 
 ProdutosModel.hasMany(OpcoesModel, { 
-    foreignKey: 'product_id'
+    foreignKey: 'product_id',
+    onDelete: 'CASCADE'
 });
 
 ProdutoCategoriaModel.belongsTo(ProdutosModel, { 
-    foreignKey: 'product_id'
+    foreignKey: 'product_id',
+    onDelete: 'CASCADE'
 });
 
 ProdutoCategoriaModel.belongsTo(CategoriasModel, { 
-    foreignKey: 'category_id'
+    foreignKey: 'category_id',
+    onDelete: 'CASCADE'
 });
 
 module.exports = { ProdutosModel, ImagensModel, OpcoesModel, ProdutoCategoriaModel };
